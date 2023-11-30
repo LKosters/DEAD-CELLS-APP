@@ -13,26 +13,36 @@ class MeleeWeaponsController extends Controller
      */
     public function index()
     {
+        /**
+         * Fetches melee weapons data from an API, saves new weapons to the database, and returns a paginated view of all melee weapons.
+         *
+         * @return \Illuminate\View\View
+         */
+        
         $client = new Client();
 
         $response = $client->request('GET', 'http://localhost:5000/api/v1/melee-weapons');
 
-        $weapons = json_decode($response->getBody()->getContents());
+        $weaponsData = json_decode($response->getBody()->getContents());
 
-        foreach ($weapons as $weapon) {
-            if (!MeleeWeapon::where('weapon', $weapon->weapon)->exists()) {
+        foreach ($weaponsData as $weaponData) {
+            if (! MeleeWeapon::where('weapon', $weaponData->weapon)->exists()) {
                 MeleeWeapon::create([
-                    'base_dps' => $weapon->base_dps,
-                    'blueprint_location' => $weapon->blueprint_location,
-                    'description' => $weapon->description,
-                    'scaling' => $weapon->scaling,
-                    'weapon' => $weapon->weapon,
-                    'weapon_img' => $weapon->weapon_img,
+                    'base_dps' => $weaponData->base_dps,
+                    'blueprint_location' => $weaponData->blueprint_location,
+                    'description' => $weaponData->description,
+                    'scaling' => $weaponData->scaling,
+                    'weapon' => $weaponData->weapon,
+                    'weapon_img' => $weaponData->weapon_img,
                 ]);
             }
         }
 
-        dd(MeleeWeapon::all());
+        $weapons = MeleeWeapon::paginate(20);
+
+        return view('MeleeWeapons.index', [
+            'weapons' => $weapons,
+        ]);
     }
 
     /**
@@ -40,7 +50,7 @@ class MeleeWeaponsController extends Controller
      */
     public function create()
     {
-        //
+        return view('MeleeWeapons.create');
     }
 
     /**
@@ -64,7 +74,11 @@ class MeleeWeaponsController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $weapon = MeleeWeapon::findOrFail($id);
+
+        return view('MeleeWeapons.edit', [
+            'weapon' => $weapon,
+        ]);
     }
 
     /**
@@ -72,7 +86,18 @@ class MeleeWeaponsController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $weapon = MeleeWeapon::findOrFail($id);
+
+        $weapon->update([
+            'base_dps' => $request->base_dps,
+            'blueprint_location' => $request->blueprint_location,
+            'description' => $request->description,
+            'scaling' => $request->scaling,
+            'weapon' => $request->weapon,
+            'weapon_img' => $request->weapon_img,
+        ]);
+
+        return redirect()->route('Melee weapons');
     }
 
     /**
@@ -80,6 +105,10 @@ class MeleeWeaponsController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $weapon = MeleeWeapon::findOrFail($id);
+
+        $weapon->delete();
+
+        return redirect()->route('Melee weapons');
     }
 }

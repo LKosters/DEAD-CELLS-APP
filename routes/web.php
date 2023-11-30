@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
 
-Route::get('/melee-weapons', 'App\Http\Controllers\MeleeWeaponsController@index');
+Route::get('/melee-weapons', 'App\Http\Controllers\MeleeWeaponsController@index')->name('Melee weapons');
+Route::get('/melee-weapons/create', 'App\Http\Controllers\MeleeWeaponsController@create')->name('Create melee weapon');
+Route::get('/melee-weapons/{id}/edit', 'App\Http\Controllers\MeleeWeaponsController@edit')->name('Edit melee weapon');
+Route::put('/melee-weapons/{id}', 'App\Http\Controllers\MeleeWeaponsController@update')->name('Update melee weapon');
+Route::delete('/melee-weapons/{id}', 'App\Http\Controllers\MeleeWeaponsController@destroy')->name('Delete melee weapon');
